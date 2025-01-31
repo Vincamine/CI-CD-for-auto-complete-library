@@ -10,18 +10,55 @@ import java.util.*;
 public class AutoCompleteLibrary {
     private final Trie trie;
     private Set<String> builtInDictionary;
+    
     /**
-     * Initializes the library with words from the provided file.
-     * @param wordListFile file containing the word list
-     * @throws IOException if there's an error reading the file
+     * Constructs an AutoCompleteLibrary instance and loads words from the specified file.
+     *
+     * @param wordListFile the file containing words to be loaded
+     * @throws IllegalArgumentException if the file is null
+     * @throws IOException if an error occurs while reading the file
      */
-    public AutoCompleteLibrary(File wordListFile) throws IOException {
-        trie = new Trie();
-        builtInDictionary = new HashSet<>();
-        loadWords(wordListFile);
+    private AutoCompleteLibrary(Trie trie, HashSet<String> builtInDictionary) {
+        this.trie = trie;
+        this.builtInDictionary = builtInDictionary;
     }
 
-    private void loadWords(File file) throws IOException {
+    /**
+     * Factory method to create an AutoCompleteLibrary instance.
+     *
+     * @param wordListFile the file containing words to be loaded
+     * @return an instance of AutoCompleteLibrary
+     * @throws IllegalArgumentException if the file is null
+     * @throws IOException if an error occurs while reading the file
+     */
+    public static AutoCompleteLibrary create(File wordListFile) throws IOException {
+        if (wordListFile == null) {
+            throw new IllegalArgumentException("File cannot be null");
+        }
+
+        Trie trie = new Trie();
+        HashSet<String> builtInDictionary = new HashSet<>();
+
+        // Load words from the file
+        try {
+            loadWords(wordListFile, trie, builtInDictionary);
+        } catch (IOException e) {
+            System.err.println("Error loading words from file: " + e.getMessage());
+            throw new IOException("Failed to initialize AutoCompleteLibrary", e);
+        }
+
+        return new AutoCompleteLibrary(trie, builtInDictionary);
+    }
+
+    /**
+     * Loads words from the specified file into the built-in dictionary.
+     *
+     * @param file the file containing words to be loaded
+     * @param trie the Trie to add words to
+     * @param builtInDictionary the HashSet to store the words
+     * @throws IOException if an error occurs while reading the file
+     */
+    private static void loadWords(File file, Trie trie, HashSet<String> builtInDictionary) throws IOException {
         try (BufferedReader reader = new BufferedReader(
             new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
             String line;
@@ -29,9 +66,8 @@ public class AutoCompleteLibrary {
                 if (line.matches("[a-zA-Z]+")) {
                     String word = line.trim();
                     if (!word.isEmpty() && word.matches("[a-zA-Z]+")) {
-                        if (builtInDictionary.add(word)) {
-                            trie.addWord(word);
-                        }
+                        builtInDictionary.add(word);
+                        trie.addWord(word);
                     }
                 }
             }
@@ -70,7 +106,7 @@ public class AutoCompleteLibrary {
      * @param wordList the file containing words to add
      */
     public void addToBuiltInDictionary(File wordList) {
-        try (BufferedReader br = new BufferedReader(new FileReader(wordList))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(wordList), StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String validWord = validateAndTrimWord(line);

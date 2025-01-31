@@ -1,6 +1,7 @@
 package autowordcomplete;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,8 +35,11 @@ public class AutoCompleteMain {
             }
 
             String dictionaryFile = null;
-            boolean union = false;
+            String defaultDictionaryFile = "src/main/resources/words_alpha.txt";
+
             String prefix = null;
+            boolean union = false;
+            boolean userDic = false;
 
             for (int i = 0; i < args.length; i++) {
                 switch (args[i]) {
@@ -47,6 +51,7 @@ public class AutoCompleteMain {
                         return;
                     case "--dictionary":
                     case "-d":
+                        userDic = true;
                         if (i + 1 < args.length) {
                             dictionaryFile = args[++i];
                         } else {
@@ -70,36 +75,69 @@ public class AutoCompleteMain {
             }
 
             if (prefix == null) {
-                System.out.println("Usage: java AutoCompleteMain <prefix>");
+                printHelp();
                 return;
             }
 
-            if (dictionaryFile != null) {
-                File wordList = new File(dictionaryFile);
-                AutoCompleteLibrary acl = new AutoCompleteLibrary(wordList);
-                if (union) {
-                    acl.addToBuiltInDictionary(wordList);
-                }
-                List<String> completions = acl.getCompletions(prefix);
-                System.out.print("OUTPUT ");
-                System.out.println(String.join(" ", completions));
+            List<String> allWords = new ArrayList<>();
+
+            if(!union && !userDic){
+                File defaultWordList = new File(defaultDictionaryFile);
+                AutoCompleteLibrary defaultAcl = AutoCompleteLibrary.create(defaultWordList);
+                allWords = defaultAcl.getCompletions(prefix);
             } else {
-                System.out.println("Error: Dictionary file is required.");
+                if(!union){
+                    if(dictionaryFile == null){
+                        System.out.println("Using -d|-dictionary but no dictionary found");
+                        return;
+                    }
+                    File userWordList = new File(dictionaryFile);
+                    AutoCompleteLibrary userAcl = AutoCompleteLibrary.create(userWordList);
+
+                    allWords = userAcl.getCompletions(prefix);
+                } else if(union && userDic) {
+                    // union branch
+                    File defaultWordList = new File(defaultDictionaryFile);
+                    AutoCompleteLibrary defaultAcl = AutoCompleteLibrary.create(defaultWordList);
+                    List<String> defaultCompletions = defaultAcl.getCompletions(prefix);
+                    File userWordList = new File(dictionaryFile);
+                    AutoCompleteLibrary userAcl = AutoCompleteLibrary.create(userWordList);
+                    List<String> userCompletions = userAcl.getCompletions(prefix);
+    
+                    allWords = new ArrayList<>(userCompletions);
+                    allWords.addAll(defaultCompletions);
+                } else {
+                    System.out.println("invalid option 'union'\n");
+                    printHelp();
+                    return;
+                }
             }
+
+            System.out.print("OUTPUT ");
+            System.out.println(String.join(" ", allWords));
 
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
         }
     }
 
+    /**
+     * Prints the usage information for the AutoCompleteMain application.
+     * This method displays the command-line options available to the user,
+     * including how to use the application and the purpose of each option.
+     */
     private static void printHelp() {
         System.out.println("Usage: java AutoCompleteMain <options> <prefix>");
         System.out.println("--help          Print this help message.");
         System.out.println("--version       Print the program version.");
         System.out.println("--dictionary|-d <filename>  Use the specified dictionary file.");
-        System.out.println("--union|-u     Combine the specified dictionary with the built-in dictionary.");
+        System.out.println("--union|-u     Combine the specified dictionary with the built-in dictionary. This options is only valid when --dictionary option is also given");
     }
-
+    
+    /**
+     * Prints the version information for the AutoCompleteLibrary application.
+     * This method displays the current version of the application to the user.
+     */
     private static void printVersion() {
         System.out.println("AutoCompleteLibrary version 1.0");
     }

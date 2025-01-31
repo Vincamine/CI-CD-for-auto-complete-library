@@ -4,6 +4,8 @@ import org.junit.jupiter.api.*;
 import java.io.*;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
+import java.nio.charset.StandardCharsets;
+
 
 class AutoCompleteLibraryTest {
     private AutoCompleteLibrary library;
@@ -12,17 +14,19 @@ class AutoCompleteLibraryTest {
     @BeforeEach
     void setUp() throws IOException {
         testFile = File.createTempFile("words", ".txt");
-        try (PrintWriter writer = new PrintWriter(testFile)) {
+        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(testFile), StandardCharsets.UTF_8))) {
             writer.println("test");
             writer.println("testing");
             writer.println("tester");
         }
-        library = new AutoCompleteLibrary(testFile);
+        library = AutoCompleteLibrary.create(testFile);
     }
 
     @AfterEach
     void tearDown() {
-        testFile.delete();
+        if (!testFile.delete()) {
+            System.err.println("Warning: Failed to delete temporary file: " + testFile.getAbsolutePath());
+        }
     }
 
     @Test

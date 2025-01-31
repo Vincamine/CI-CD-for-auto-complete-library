@@ -8,33 +8,65 @@ A Java library for providing auto-completion of English words based on a Trie da
 - Support for word addition and removal
 - Input validation for alphabetic-only words
 
-## Usage
-To use the Auto-completion Library, you can run the `AutoCompleteMain` class from the command line. Here's how to do it:
+## Compile and Run
+Please follow these steps to compile the project and run the program:
 
-1. Ensure you have a text file containing a list of words (one word per line).
-2. Compile the project and run the following command:
-
+1. Compile the project:
    ```bash
-   java -cp build/libs/HW1-0.1.0.jar autowordcomplete.AutoCompleteMain <path_to_word_list> <prefix>
+   ./gradlew build
    ```
 
-   Replace `<path_to_word_list>` with the path to your word list file and `<prefix>` with the prefix you want to complete.
-
+2. Run the following command:
+   ```bash
+   java -jar build/libs/HW1-0.1.0.jar <option> <prefix>
+   ```
    **Example**:
    ```bash
-   java -cp build/libs/HW1-0.1.0.jar autowordcomplete.AutoCompleteMain src/main/resources/words.txt xylo
+   java -jar build/libs/HW1-0.1.0.jar xylopho
    ```
+   This will output all words that start with the prefix `xylopho`.
 
-   This will output all words that start with the prefix `xylo`.
-3. Add word API:
-    To add a new word to the auto-completion library, you can use the `addWord` method provided by the `AutoCompleteLibrary` class. Here’s how to do it:
-        1. Create an instance of `AutoCompleteLibrary` with the word list file.
-        2. Call the `addWord` method with the word you want to add.
+## Usage
+### 1. Display Help Information
+To display help information about the available commands and options, use:
+```bash
+java -jar build/libs/HW1-0.1.0.jar --help
+```
+### 2. Display Version Information
+To check the version of the application, run:
+```bash
+java -jar build/libs/HW1-0.1.0.jar --version
+```
 
-4. Remove word API
-    To remove a word from the auto-completion library, you can use the `removeWord` method provided by the `AutoCompleteLibrary` class. Here’s how to do it:
-        1. Create an instance of `AutoCompleteLibrary` with the word list file.
-        2. Call the `removeWord` method with the word you want to remove.
+### 3. Autocomplete with a Custom Dictionary
+To use a custom dictionary file, run the following command:
+```bash
+java -jar build/libs/HW1-0.1.0.jar --dictionary path/to/your/custom_dictionary.txt <prefix>
+```
+Replace `path/to/your/custom_dictionary.txt` with the path to your custom dictionary file and `<prefix>` with the desired prefix.
+
+### 4. Autocomplete with the Built-in Dictionary
+If you want to use the built-in dictionary, simply run:
+```bash
+java -jar build/libs/HW1-0.1.0.jar <prefix>
+```
+This will use the default built-in dictionary located at `src/main/resources/words_alpha.txt`.
+
+### 5. Combine Custom Dictionary with Built-in Dictionary
+To combine a specified custom dictionary with the built-in dictionary, use the `--union` or `-u` option. This allows you to get autocompletion results from both dictionaries.
+
+**Usage:**
+```bash
+java -jar build/libs/HW1-0.1.0.jar --dictionary path/to/your/custom_dictionary.txt --union <prefix>
+```
+
+**Example:**
+```bash
+java -jar build/libs/HW1-0.1.0.jar --dictionary src/main/resources/custom_words.txt --union xylo
+```
+
+In this example, the program will combine the completions from `custom_words.txt` with the built-in dictionary and return results for the prefix `xylo`.
+
 
 ## Adding as a Dependency
 To use this library as a dependency in another Java project, add the following to your `build.gradle` file:
@@ -112,13 +144,13 @@ To contribute to the development of this library, follow these steps:
             implementation 'io.github.Vincamine:autowordcomplete:0.1.0'
          }
    ```
+
    ```bash
    ./gradlew build        # Build project
    ./gradlew test         # Run tests
    ./gradlew jacocoTestReport  # Generate coverage report
    ./gradlew javadoc     # Generate documentation
    ```
-
 
 ## Published Maven Central package
 [https://github.com/CS6510-SEA-SP25/hw1-Vincamine/packages/2381967](https://github.com/CS6510-SEA-SP25/hw1-Vincamine/packages/2381967)
@@ -130,3 +162,29 @@ To contribute to the development of this library, follow these steps:
   <version>0.1.0</version>
 </dependency>
 ```
+
+## Usage Instructions for Docker Image
+
+This document provides step-by-step instructions for using the Docker image containing the AutoComplete application.
+
+### Prerequisites
+- **Docker** must be installed on your machine.
+  - [Download Docker](https://www.docker.com/products/docker-desktop/)
+---
+
+### Pulling the Docker Image
+To get the latest version of the AutoComplete application, pull the Docker image from DockerHub:
+
+```bash
+docker pull wylliefang/ac:1.0
+```
+
+### Running the Application
+
+```bash
+docker run wylliefang/ac:1.0 <option> <prefix>
+```
+
+### Docker Image
+You can find the published Docker image on DockerHub at the following link:
+[DockerHub - Wyllie Fang's General Image](https://hub.docker.com/repository/docker/wylliefang/ac/general)
