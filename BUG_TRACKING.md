@@ -10,3 +10,6 @@
         Caused by: java.lang.ClassNotFoundException: org.gradle.wrapper.GradleWrapperMain
 - **Plan for Fix:** Check backend logs tomorrow, possibly caused by some wrong name.
 - **Status:** Fixed
+
+## 🐞 Bug 2: (2025-01-30)
+- **Status:** Fixed
